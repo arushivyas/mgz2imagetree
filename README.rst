@@ -1,0 +1,1 @@
+mgz2imagetree is a Python utility that walks through a directory structure of subjects within the inputdir, fetches ``.mgz`` files from them, uses ``mgz2imgslices`` to filter labels and create labelled directories containing png/jpeg slices for each subject in the outputdir
