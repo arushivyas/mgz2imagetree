@@ -29,8 +29,50 @@ class mgz2imagetree():
         self.__name__                   = "pfdicom_tagExtract"
         self.str_version                = "2.2.20"
 
+         # Directory and filenames
+        self.str_workingDir             = ''
+        self.str_inputDir               = ''
+        self.str_inputFile              = ''
+        self.str_extension              = 'mgz'
+        self.str_outputFileStem         = ''
+        self.str_ouptutDir              = ''
+        self.str_outputLeafDir          = ''
+        self.maxDepth                   = -1
+
         # pftree dictionary
         self.pf_tree                    = None
+        self.numThreads                 = 1
+
+        self.str_stdout                 = ''
+        self.str_stderr                 = ''
+        self.exitCode                   = 0
+
+    def filelist_prune(self, at_data, *args, **kwargs):
+        """
+        Given a list of files, possibly prune list by 
+        extension.
+        """
+
+        b_status    = True
+        l_file      = []
+        str_path    = at_data[0]
+        al_file     = at_data[1]
+        if len(self.str_extension):
+            al_file = [x for x in al_file if self.str_extension in x]
+
+        if len(al_file):
+            al_file.sort()
+            l_file      = al_file
+            b_status    = True
+        else:
+            self.dp.qprint( "No valid files to analyze found in path %s!" % str_path, 
+                            comms = 'error', level = 3)
+            l_file      = None
+            b_status    = False
+        return {
+            'status':   b_status,
+            'l_file':   l_file
+        }
 
     def inputReadCallback(self, *args, **kwargs):
         """
