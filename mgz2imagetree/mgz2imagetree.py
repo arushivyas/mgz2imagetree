@@ -29,6 +29,9 @@ class mgz2imagetree():
         self.__name__                   = "pfdicom_tagExtract"
         self.str_version                = "2.2.20"
 
+        # pftree dictionary
+        self.pf_tree                    = None
+
     def inputReadCallback(self, *args, **kwargs):
         """
 
