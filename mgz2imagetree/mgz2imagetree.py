@@ -4,6 +4,7 @@ import os, sys
 # Project specific imports
 import      pfmisc
 from        pfmisc._colors      import  Colors
+from        pfmisc.debug        import  debug
 from        pfmisc              import  other
 from        pfmisc              import  error
 import argparse
@@ -28,6 +29,11 @@ class mgz2imagetree():
         self.str_desc                   = ''
         self.__name__                   = "pfdicom_tagExtract"
         self.str_version                = "2.2.20"
+        self.verbosity                  = 1
+        self.dp                         = pfmisc.debug(
+                                            verbosity   = self.verbosity,
+                                            within      = self.__name__
+                                            )
 
          # Directory and filenames
         self.str_workingDir             = ''
@@ -46,6 +52,46 @@ class mgz2imagetree():
         self.str_stdout                 = ''
         self.str_stderr                 = ''
         self.exitCode                   = 0
+
+    def tic():
+    """
+        Port of the MatLAB function of same name
+    """
+    global Gtic_start
+    Gtic_start = time.time()
+
+    def toc(*args, **kwargs):
+    """
+        Port of the MatLAB function of same name
+
+        Behaviour is controllable to some extent by the keyword
+        args:
+
+
+    """
+    global Gtic_start
+    f_elapsedTime = time.time() - Gtic_start
+    for key, value in kwargs.items():
+        if key == 'sysprint':   return value % f_elapsedTime
+        if key == 'default':    return "Elapsed time = %f seconds." % f_elapsedTime
+    return f_elapsedTime
+
+    def env_check(self, *args, **kwargs):
+        """
+        This method provides a common entry for any checks on the 
+        environment (input / output dirs, etc)
+        """
+        b_status    = True
+        str_error   = ''
+        if not len(self.str_outputDir): 
+            b_status = False
+            str_error   = 'output directory not specified.'
+            self.dp.qprint(str_error, comms = 'error')
+            error.warn(self, 'outputDirFail', drawBox = True)
+        return {
+            'status':       b_status,
+            'str_error':    str_error
+        }
 
     def filelist_prune(self, at_data, *args, **kwargs):
         """
@@ -125,3 +171,59 @@ class mgz2imagetree():
                                 persistAnalysisResults  = False
         )
         return d_create_imagetree
+
+    def run(self, *args, **kwargs):
+        """
+        The run method is merely a thin shim down to the 
+        embedded pftree run method.
+        """
+        b_status            = True
+        d_pftreeRun         = {}
+        d_inputAnalysis     = {}
+        d_env               = self.env_check()
+        b_timerStart        = False
+
+        self.dp.qprint(
+                "\tStarting pfdicom run... (please be patient while running)", 
+                level = 1
+                )
+
+        for k, v in kwargs.items():
+            if k == 'timerStart':   b_timerStart    = bool(v)
+
+        if b_timerStart:
+            self.tic()
+
+        if d_env['status']:
+            d_pftreeRun = self.pf_tree.run(timerStart = False)
+        else:
+            b_status    = False 
+
+        str_startDir    = os.getcwd()
+        os.chdir(self.str_inputDir)
+        if b_status:
+            if len(self.str_extension):
+                d_inputAnalysis = self.pf_tree.tree_process(
+                                inputReadCallback       = None,
+                                analysisCallback        = self.filelist_prune,
+                                outputWriteCallback     = None,
+                                applyResultsTo          = 'inputTree',
+                                applyKey                = 'l_file',
+                                persistAnalysisResults  = True
+                )
+        os.chdir(str_startDir)
+
+        d_ret = {
+            'status':           b_status and d_pftreeRun['status'],
+            'd_env':            d_env,
+            'd_pftreeRun':      d_pftreeRun,
+            'd_inputAnalysis':  d_inputAnalysis,
+            'runTime':          self.toc()
+        }
+
+        # if self.b_json:
+        #     self.ret_dump(d_ret, **kwargs)
+
+        self.dp.qprint('\tReturning from pfdicom run...', level = 1)
+
+        return d_ret
