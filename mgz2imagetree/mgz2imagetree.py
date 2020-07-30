@@ -226,6 +226,30 @@ class mgz2imagetree(object):
 
         print("in output save call back")
 
+        path                = at_data[0]
+        d_outputInfo        = at_data[1]
+        other.mkdir(self.str_outputDir)
+        filesSaved          = 0
+        other.mkdir(path)
+        if not self.testType:
+            str_outfile         = '%s/file-ls.txt'      % path
+        else:
+            str_outfile         = '%s/file-count.txt'   % path
+
+        with open(str_outfile, 'w') as f:
+            self.dp.qprint("saving: %s" % (str_outfile), level = 5)
+            if not self.testType:
+                f.write('%s`' % self.pp.pformat(d_outputInfo['l_file']))
+            else:
+                f.write('%d\n' % d_outputInfo['filesAnalyzed'])
+        filesSaved += 1
+        
+        return {
+            'status':       True,
+            'outputFile':   str_outfile,
+            'filesSaved':   filesSaved
+        }
+
     def create_imagetree(self, **kwargs):
         """
         A simple "alias" for calling the pftree method.
