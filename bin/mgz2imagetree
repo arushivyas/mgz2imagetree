@@ -8,9 +8,9 @@
 #
 
 import sys, os
-sys.path.insert(1, os.path.join(os.path.dirname(__file__), '../pfdicom_tagExtract'))
+sys.path.insert(1, os.path.join(os.path.dirname(__file__), '../mgz2imagetree'))
 
-from mgz2imagetree          import mgz2imagetree
+import mgz2imagetree
 from    argparse            import RawTextHelpFormatter
 from    argparse            import ArgumentParser
 import  pudb
@@ -203,6 +203,19 @@ parser.add_argument("-t", "--outputFileType",
                     help    = "list of output report types",
                     dest    = 'outputFileType',
                     default = 'raw')
+parser.add_argument("-f", "--feature",
+                    help    = "name of mgz file with features (aparc+aseg)",
+                    dest    = 'feature',
+                    default = 'aparc+aseg.mgz')
+parser.add_argument("--image",
+                    help    = "name of entire image file (brain.mgz)",
+                    dest    = 'image',
+                    default = 'brain.mgz')
+parser.add_argument('--label',
+                    help='prefix a label to all the label directories',
+                    dest='label',
+                    default = 'label'
+                    )
 parser.add_argument("-x", "--man",
                     help    = "man",
                     dest    = 'man',
@@ -217,6 +230,11 @@ parser.add_argument("--outputLeafDir",
                     help    = "formatting spec for output leaf directory",
                     dest    = 'outputLeafDir',
                     default = "")
+parser.add_argument("--printElapsedTime",
+                    help    = "print program run time",
+                    dest    = 'printElapsedTime',
+                    action  = 'store_true',
+                    default = False)
 parser.add_argument("-v", "--verbosity",
                     help    = "verbosity level for app",
                     dest    = 'verbosity',
@@ -243,7 +261,6 @@ if args.b_version:
     sys.exit(1)
 
 # pudb.set_trace()
-
 mgz2imagetree = mgz2imagetree.mgz2imagetree(
                         inputDir            = args.inputDir,
                         inputFile           = args.inputFile,
@@ -251,9 +268,14 @@ mgz2imagetree = mgz2imagetree.mgz2imagetree(
                         outputFileStem      = args.outputFileStem,
                         outputLeafDir       = args.outputLeafDir,
                         outputFileType      = args.outputFileType,
+                        feature             = args.feature,
+                        image               = args.image,
+                        label               = args.label,
+                        man                 = args.man,
+                        synopsis            = args.synopsis,
                         verbosity           = args.verbosity,
                         version             = str_version   
-)
+                        )
 
 # And now run it!
 d_mgz2imagetree = mgz2imagetree.run(timerStart = True)

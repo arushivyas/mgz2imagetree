@@ -9,8 +9,9 @@ from        pfmisc              import  other
 from        pfmisc              import  error
 import argparse
 import pftree
+import time
 
-class mgz2imagetree():
+class mgz2imagetree(object):
     """ 
     A class based on 'pftree' structure that walks through the inputdir, 
     and filters mgz volumes for each subject into its constituent labels as indivdual directories 
@@ -18,7 +19,7 @@ class mgz2imagetree():
 
     """
 
-    def declare_selfvars(self):
+    def __init__(self, **kwargs):
         """
         A block to declare self variables
         """
@@ -27,8 +28,8 @@ class mgz2imagetree():
         # Object desc block
         #
         self.str_desc                   = ''
-        self.__name__                   = "pfdicom_tagExtract"
-        self.str_version                = "2.2.20"
+        self.__name__                   = "mgz2imagetree"
+        self.str_version                = "1.0.0"
         self.verbosity                  = 1
         self.dp                         = pfmisc.debug(
                                             verbosity   = self.verbosity,
@@ -41,40 +42,69 @@ class mgz2imagetree():
         self.str_inputFile              = ''
         self.str_extension              = 'mgz'
         self.str_outputFileStem         = ''
-        self.str_ouptutDir              = ''
+        self.str_outputDir              = ''
         self.str_outputLeafDir          = ''
+        self.str_label                  = 'label'
+        self.str_outputFileType         = ''
+        self.str_feature                = ''
+        self.str_image                  = ''
         self.maxDepth                   = -1
 
         # pftree dictionary
         self.pf_tree                    = None
         self.numThreads                 = 1
+        self.b_followLinks              = False
 
         self.str_stdout                 = ''
         self.str_stderr                 = ''
         self.exitCode                   = 0
 
-    def tic():
-    """
-        Port of the MatLAB function of same name
-    """
-    global Gtic_start
-    Gtic_start = time.time()
+        for key, value in kwargs.items():
+            if key == "inputFile":              self.str_inputFile          = value
+            if key == "inputDir":               self.str_inputDir           = value
+            if key == "outputDir":              self.str_outputDir          = value
+            if key == "outputFileStem":         self.str_outputFileStem     = value
+            if key == "outputFileType":         self.str_outputFileType     = value
+            if key == "label":                  self.str_label              = value
+            if key == "feature":                self.str_feature            = value
+            if key == "image":                  self.str_image              = value
 
-    def toc(*args, **kwargs):
-    """
-        Port of the MatLAB function of same name
+        # Declare pf_tree
+        self.pf_tree    = pftree.pftree(
+                            inputDir                = self.str_inputDir,
+                            maxDepth                = self.maxDepth,
+                            inputFile               = self.str_inputFile,
+                            outputDir               = self.str_outputDir,
+                            outputLeafDir           = self.str_outputLeafDir,
+                            threads                 = self.numThreads,
+                            verbosity               = self.verbosity,
+                            followLinks             = self.b_followLinks,
+                            relativeDir             = True
+        )
 
-        Behaviour is controllable to some extent by the keyword
-        args:
+    def tic(self):
+        """
+            Port of the MatLAB function of same name
+        """
+
+        global Gtic_start
+        Gtic_start = time.time()
+
+    def toc(self, *args, **kwargs):
+        """
+            Port of the MatLAB function of same name
+
+            Behaviour is controllable to some extent by the keyword
+            args:
 
 
-    """
-    global Gtic_start
-    f_elapsedTime = time.time() - Gtic_start
-    for key, value in kwargs.items():
-        if key == 'sysprint':   return value % f_elapsedTime
-        if key == 'default':    return "Elapsed time = %f seconds." % f_elapsedTime
-    return f_elapsedTime
+        """
+        global Gtic_start
+        f_elapsedTime = time.time() - Gtic_start
+        for key, value in kwargs.items():
+            if key == 'sysprint':   return value % f_elapsedTime
+            if key == 'default':    return "Elapsed time = %f seconds." % f_elapsedTime
+        return f_elapsedTime
 
     def env_check(self, *args, **kwargs):
         """
@@ -130,7 +160,41 @@ class mgz2imagetree():
         the mgz data set of each subject.
 
         """
-    
+
+        b_status            = True
+        str_file            = ''
+        d_MGZfileRead       = {}
+        filesRead           = 0
+
+
+        for k, v in kwargs.items():
+            if k == 'file':     str_file    = v
+            if k == 'path':     str_path    = v
+
+        # pudb.set_trace()
+
+        if len(args):
+            at_data         = args[0]
+            str_path        = at_data[0]
+            l_file          = at_data[1]
+            str_file        = l_file[0]
+
+        print(str(at_data) + "\n" + str_path + "\n"+str(l_file) + "\n" + str_file)
+
+        if len(str_file):
+            self.dp.qprint("reading: %s/%s" % (str_path, str_file), level = 5)
+            # Add code for d_MGZfileread, b_status update and filelRead++
+        else:
+            b_status        = False
+
+        return {
+            'status':           b_status,
+            'str_file':         str_file,
+            'str_path':         str_path,
+            'd_MGZfileRead':    d_MGZfileRead,
+            'filesRead':        filesRead
+        }
+
     def inputAnalyzeCallback(self, *args, **kwargs):
         """
         Callback for doing actual work on the read data.
@@ -144,6 +208,7 @@ class mgz2imagetree():
         method.**
 
         """
+        print("in AnalyzeCallback")
 
     def outputSaveCallback(self, at_data, **kwargs):
         """
@@ -159,6 +224,8 @@ class mgz2imagetree():
 
         """
 
+        print("in output save call back")
+
     def create_imagetree(self, **kwargs):
         """
         A simple "alias" for calling the pftree method.
@@ -168,8 +235,8 @@ class mgz2imagetree():
                                 inputReadCallback       = self.inputReadCallback,
                                 analysisCallback        = self.inputAnalyzeCallback,
                                 outputWriteCallback     = self.outputSaveCallback,
-                                persistAnalysisResults  = False
-        )
+                                persistAnalysisResults  = False,
+                                )
         return d_create_imagetree
 
     def run(self, *args, **kwargs):
@@ -201,6 +268,13 @@ class mgz2imagetree():
 
         str_startDir    = os.getcwd()
         os.chdir(self.str_inputDir)
+        if b_status:
+            d_create_imagetree    = self.create_imagetree()
+            b_status        = b_status and d_create_imagetree['status']
+        os.chdir(str_startDir)
+
+        # str_startDir    = os.getcwd()
+        # os.chdir(self.str_inputDir)
         if b_status:
             if len(self.str_extension):
                 d_inputAnalysis = self.pf_tree.tree_process(
