@@ -10,6 +10,7 @@ from        pfmisc              import  error
 import argparse
 import pftree
 import time
+import mgz2imgslices
 
 class mgz2imagetree(object):
     """ 
@@ -150,6 +151,21 @@ class mgz2imagetree(object):
             'l_file':   l_file
         }
 
+    def MGZFileRead(self, *args, **kwargs):
+        """
+
+        Extracts all the MGZ files from the inputdir and 
+        returns them as dictionary
+        """
+        b_status = False
+        str_file        = ""
+
+        for k, v in kwargs.items():
+            if k == 'file':             str_file    = v
+        
+        str_path        = os.path.dirname(str_file)
+
+        
     def inputReadCallback(self, *args, **kwargs):
         """
 
