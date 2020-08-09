@@ -274,18 +274,21 @@ parser.add_argument('--version',
 args = parser.parse_args()
 
 for root, dirs, files in os.walk(args.inputDir):
+    print(dirs)
     for file in files:
-        if file.endswith(".mgz"):
+        if file==args.feature:
             print(os.path.join(root, file))
             # Create the object
             args.inputFile = file
             args.inputDir = root
             print(args.inputFile + " AND "+ args.inputDir)
             imgConverter    = mgz2imgslices.object_factoryCreate(args).C_convert
-
+            print(imgConverter.str_inputFile)
             # And now run it!
             imgConverter.tic()
             imgConverter.run()
+
+
 
 
 

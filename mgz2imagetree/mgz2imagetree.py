@@ -157,13 +157,33 @@ class mgz2imagetree(object):
         Extracts all the MGZ files from the inputdir and 
         returns them as dictionary
         """
-        b_status = False
-        str_file        = ""
+        b_status            = True
+        l_file              = []
+        str_file            = ''
+        filesRead           = 0
+
 
         for k, v in kwargs.items():
-            if k == 'file':             str_file    = v
-        
-        str_path        = os.path.dirname(str_file)
+            if k == 'file':     str_file    = v
+
+        # pudb.set_trace()
+        str_featureFile = ""
+        str_imageFile   = ""
+
+        for root, dirs, files in os.walk(self.str_inputDir):
+            print(dirs)
+            for file in files:
+                if file==self.str_feature:
+                    print(os.path.join(root, file))
+                    # Create the object
+                    self.str_inputFile = file
+                    self.str_inputDir = root
+                    print(self.str_inputFile + " AND "+ self.str_inputDir)
+
+        return {
+            "featureFile":    str_featureFile,
+            "imageFile":      str_imageFile   
+        }
 
         
     def inputReadCallback(self, *args, **kwargs):
@@ -193,16 +213,23 @@ class mgz2imagetree(object):
             at_data         = args[0]
             str_path        = at_data[0]
             l_file          = at_data[1]
-            str_file        = l_file[0]
+            if len(l_file)>1:
+                str_file        = l_file[1]
 
-        print(str(at_data) + "\n" + str_path + "\n"+str(l_file) + "\n" + str_file)
+        if str_file=="aparc.a2009s+aseg.mgz":
+            print(str(at_data) + "\n" + str_path + "\n"+str(l_file) + "\n" + str_file)
+        # print(str(at_data) + "\n" + str_path + "\n"+str(l_file) + "\n")
 
         if len(str_file):
-            self.dp.qprint("reading: %s/%s" % (str_path, str_file), level = 5)
+            self.dp.qprint("reading: %s/%s" % (str_path, str_file), level = 1)
+            d_MGZfileRead = self.MGZFileRead()
+            # print(d_MGZfileRead.items())
+
             # Add code for d_MGZfileread, b_status update and filelRead++
         else:
             b_status        = False
 
+        
         return {
             'status':           b_status,
             'str_file':         str_file,
@@ -226,6 +253,12 @@ class mgz2imagetree(object):
         """
         print("in AnalyzeCallback")
 
+        return {
+            'status':       True,
+            'outputFile':   "",
+            'filesSaved':   0
+        }
+
     def outputSaveCallback(self, at_data, **kwargs):
         """
 
@@ -241,29 +274,11 @@ class mgz2imagetree(object):
         """
 
         print("in output save call back")
-
-        path                = at_data[0]
-        d_outputInfo        = at_data[1]
-        other.mkdir(self.str_outputDir)
-        filesSaved          = 0
-        other.mkdir(path)
-        # if not self.testType:
-        #     str_outfile         = '%s/file-ls.txt'      % path
-        # else:
-        #     str_outfile         = '%s/file-count.txt'   % path
-
-        # with open(str_outfile, 'w') as f:
-        #     self.dp.qprint("saving: %s" % (str_outfile), level = 5)
-        #     if not self.testType:
-        #         f.write('%s`' % self.pp.pformat(d_outputInfo['l_file']))
-        #     else:
-        #         f.write('%d\n' % d_outputInfo['filesAnalyzed'])
-        filesSaved += 1
         
         return {
             'status':       True,
-            'outputFile':   str_outfile,
-            'filesSaved':   filesSaved
+            'outputFile':   "",
+            'filesSaved':   0
         }
 
     def create_imagetree(self, **kwargs):
