@@ -2,15 +2,17 @@
 import os, sys
 
 # Project specific imports
+import      nibabel             as nib
 import      pfmisc
 from        pfmisc._colors      import  Colors
 from        pfmisc.debug        import  debug
 from        pfmisc              import  other
 from        pfmisc              import  error
+from        mgz2imgslices       import mgz2imgslices
 import argparse
 import pftree
 import time
-import mgz2imgslices
+
 
 class mgz2imagetree(object):
     """ 
@@ -157,32 +159,26 @@ class mgz2imagetree(object):
         Extracts all the MGZ files from the inputdir and 
         returns them as dictionary
         """
-        b_status            = True
-        l_file              = []
-        str_file            = ''
-        filesRead           = 0
-
 
         for k, v in kwargs.items():
             if k == 'file':     str_file    = v
+            if k == 'path':     str_path    = v
 
         # pudb.set_trace()
         str_featureFile = ""
         str_imageFile   = ""
 
         for root, dirs, files in os.walk(self.str_inputDir):
-            print(dirs)
             for file in files:
                 if file==self.str_feature:
-                    print(os.path.join(root, file))
-                    # Create the object
-                    self.str_inputFile = file
-                    self.str_inputDir = root
-                    print(self.str_inputFile + " AND "+ self.str_inputDir)
+                    str_featureFile = nib.load("%s/%s" % (root, file))
+                elif file==self.str_image:
+                    str_imageFile = nib.load("%s/%s" % (root, file))
+
 
         return {
             "featureFile":    str_featureFile,
-            "imageFile":      str_imageFile   
+            "imageFile":      str_imageFile,   
         }
 
         
@@ -216,20 +212,18 @@ class mgz2imagetree(object):
             if len(l_file)>1:
                 str_file        = l_file[1]
 
-        if str_file=="aparc.a2009s+aseg.mgz":
-            print(str(at_data) + "\n" + str_path + "\n"+str(l_file) + "\n" + str_file)
-        # print(str(at_data) + "\n" + str_path + "\n"+str(l_file) + "\n")
-
-        if len(str_file):
+        if len(str_file) and (str_file == self.str_feature or str_file == self.str_image):
             self.dp.qprint("reading: %s/%s" % (str_path, str_file), level = 1)
             d_MGZfileRead = self.MGZFileRead()
-            # print(d_MGZfileRead.items())
-
-            # Add code for d_MGZfileread, b_status update and filelRead++
+            print(d_MGZfileRead["featureFile"])
+            print(d_MGZfileRead["imageFile"])
+            b_status = True
+            filesRead += 2
         else:
             b_status        = False
 
         
+        # print("filesRead: " + str(filesRead))
         return {
             'status':           b_status,
             'str_file':         str_file,
@@ -251,12 +245,32 @@ class mgz2imagetree(object):
         method.**
 
         """
-        print("in AnalyzeCallback")
+    
+        b_status            = False
+        filesRead           = 0
+        filesAnalyzed       = 0
+
+        for k, v in kwargs.items():
+            if k == 'filesRead':    d_MGZRead   = v
+            if k == 'path':         str_path    = v
+
+        if len(args):
+            at_data         = args[0]
+            str_path        = at_data[0]
+            d_read          = at_data[1]
+
+        b_status        = True
+                
+        if d_read['str_file'] == self.str_feature:
+            print(at_data)
+            print("****")
+            print(str_path)
+            print("****")
+            print(d_read)
 
         return {
-            'status':       True,
-            'outputFile':   "",
-            'filesSaved':   0
+            'status':           b_status,
+            'filesAnalyzed':    filesAnalyzed,
         }
 
     def outputSaveCallback(self, at_data, **kwargs):
@@ -273,7 +287,7 @@ class mgz2imagetree(object):
 
         """
 
-        print("in output save call back")
+        # print("in output save call back")
         
         return {
             'status':       True,
