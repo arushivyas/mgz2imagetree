@@ -41,16 +41,21 @@ class mgz2imagetree(object):
 
          # Directory and filenames
         self.str_workingDir             = ''
+        self.str_outputLeafDir          = ''
+        self.str_extension              = 'mgz'
         self.str_inputDir               = ''
         self.str_inputFile              = ''
-        self.str_extension              = 'mgz'
         self.str_outputFileStem         = ''
         self.str_outputDir              = ''
-        self.str_outputLeafDir          = ''
+        self.str_outputFileType         = ''        
         self.str_label                  = 'label'
-        self.str_outputFileType         = ''
         self.str_feature                = ''
         self.str_image                  = ''
+        self.b_normalize                = False
+        self.str_lookuptable            = '__val__'
+        self.str_skipLabelValueList     = ''
+        self.str_filterLabelValueList   = ''
+        self.str_wholeVolume            = ''
         self.maxDepth                   = -1
 
         # pftree dictionary
@@ -63,14 +68,19 @@ class mgz2imagetree(object):
         self.exitCode                   = 0
 
         for key, value in kwargs.items():
-            if key == "inputFile":              self.str_inputFile          = value
-            if key == "inputDir":               self.str_inputDir           = value
-            if key == "outputDir":              self.str_outputDir          = value
-            if key == "outputFileStem":         self.str_outputFileStem     = value
-            if key == "outputFileType":         self.str_outputFileType     = value
-            if key == "label":                  self.str_label              = value
-            if key == "feature":                self.str_feature            = value
-            if key == "image":                  self.str_image              = value
+            if key == "inputFile":              self.str_inputFile              = value
+            if key == "inputDir":               self.str_inputDir               = value
+            if key == "outputDir":              self.str_outputDir              = value
+            if key == "outputFileStem":         self.str_outputFileStem         = value
+            if key == "outputFileType":         self.str_outputFileType         = value
+            if key == "label":                  self.str_label                  = value
+            if key == "feature":                self.str_feature                = value
+            if key == "image":                  self.str_image                  = value
+            if key == "normalize":              self.b_normalize                = value
+            if key == "lookuptable":            self.str_lookuptable            = value
+            if key == "skipLabelValueList":     self.str_skipLabelValueList     = value
+            if key == "filterLabelValueList":   self.str_filterLabelValueList   = value
+            if key == "wholeVolume":            self.str_wholeVolume            = value
 
         # Declare pf_tree
         self.pf_tree    = pftree.pftree(
@@ -160,25 +170,22 @@ class mgz2imagetree(object):
         returns them as dictionary
         """
 
-        for k, v in kwargs.items():
-            if k == 'file':     str_file    = v
-            if k == 'path':     str_path    = v
-
         # pudb.set_trace()
-        str_featureFile = ""
-        str_imageFile   = ""
+        mgz_featureFile = ""
+        mgz_imageFile   = ""
 
         for root, dirs, files in os.walk(self.str_inputDir):
             for file in files:
                 if file==self.str_feature:
-                    str_featureFile = nib.load("%s/%s" % (root, file))
+                    mgz_featureFile = nib.load("%s/%s" % (root, file))
                 elif file==self.str_image:
-                    str_imageFile = nib.load("%s/%s" % (root, file))
+                    mgz_imageFile = nib.load("%s/%s" % (root, file))
 
-
+        # mgz_featureFile = nib.load("%s/%s" (str_path, self.str_feature))
+        # mgz_imageFile = nib.load("%s/%s" (str_path,self.str_image))
         return {
-            "featureFile":    str_featureFile,
-            "imageFile":      str_imageFile,   
+            "featureFile":    mgz_featureFile,
+            "imageFile":      mgz_imageFile,   
         }
 
         
@@ -195,7 +202,6 @@ class mgz2imagetree(object):
 
         b_status            = True
         str_file            = ''
-        d_MGZfileRead       = {}
         filesRead           = 0
 
 
@@ -208,27 +214,19 @@ class mgz2imagetree(object):
         if len(args):
             at_data         = args[0]
             str_path        = at_data[0]
-            l_file          = at_data[1]
-            if len(l_file)>1:
-                str_file        = l_file[1]
+            l_files          = at_data[1]
 
-        if len(str_file) and (str_file == self.str_feature or str_file == self.str_image):
-            self.dp.qprint("reading: %s/%s" % (str_path, str_file), level = 1)
-            d_MGZfileRead = self.MGZFileRead()
-            print(d_MGZfileRead["featureFile"])
-            print(d_MGZfileRead["imageFile"])
+        if self.str_feature in l_files and self.str_image in l_files:
+            self.dp.qprint("reading: %s" % (str_path), level = 1)
             b_status = True
             filesRead += 2
         else:
             b_status        = False
 
-        
-        # print("filesRead: " + str(filesRead))
         return {
             'status':           b_status,
-            'str_file':         str_file,
             'str_path':         str_path,
-            'd_MGZfileRead':    d_MGZfileRead,
+            'l_files':           l_files,
             'filesRead':        filesRead
         }
 
@@ -250,23 +248,41 @@ class mgz2imagetree(object):
         filesRead           = 0
         filesAnalyzed       = 0
 
-        for k, v in kwargs.items():
-            if k == 'filesRead':    d_MGZRead   = v
-            if k == 'path':         str_path    = v
+        # for k, v in kwargs.items():
+        #     if k == 'filesRead':    d_MGZRead   = v
+        #     if k == 'path':         str_path    = v
 
         if len(args):
             at_data         = args[0]
             str_path        = at_data[0]
             d_read          = at_data[1]
+            l_files         = d_read['l_files']
 
-        b_status        = True
-                
-        if d_read['str_file'] == self.str_feature:
+        if self.str_feature in l_files and self.str_image in l_files:   
+            b_status        = True   
+            print("****")
             print(at_data)
-            print("****")
-            print(str_path)
-            print("****")
-            print(d_read)
+        
+        d_args = {
+            "inputFile":            self.str_feature,
+            "inputDir":             str_path,
+            "outputDir":            self.str_outputDir,
+            "outputFileStem":       self.str_outputFileStem, 
+            "outputFileType":       self.str_outputFileType,
+            "label":                self.str_label,
+            "normalize":            self.b_normalize,
+            "lookuptable":          self.str_lookuptable,
+            "skipLabelValueList":   self.str_skipLabelValueList,
+            "filterLabelValueList": self.str_filterLabelValueList,
+            "wholeVolume":          self.str_wholeVolume    
+        }
+
+        print(d_args)
+        imgConverter    = mgz2imgslices.object_factoryCreate(d_args).C_convert
+
+        # And now run it!
+        # imgConverter.tic()
+        imgConverter.run()        
 
         return {
             'status':           b_status,
@@ -303,7 +319,7 @@ class mgz2imagetree(object):
         d_create_imagetree    = self.pf_tree.tree_process(
                                 inputReadCallback       = self.inputReadCallback,
                                 analysisCallback        = self.inputAnalyzeCallback,
-                                outputWriteCallback     = self.outputSaveCallback,
+                                outputWriteCallback     = None,
                                 persistAnalysisResults  = False,
                                 )
         return d_create_imagetree
