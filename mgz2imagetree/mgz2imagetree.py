@@ -163,32 +163,31 @@ class mgz2imagetree(object):
             'l_file':   l_file
         }
 
-    def MGZFileRead(self, *args, **kwargs):
-        """
+    # def MGZFileRead(self, *args, **kwargs):
+    #     """
 
-        Extracts all the MGZ files from the inputdir and 
-        returns them as dictionary
-        """
+    #     Extracts all the MGZ files from the inputdir and 
+    #     returns them as dictionary
+    #     """
 
-        # pudb.set_trace()
-        mgz_featureFile = ""
-        mgz_imageFile   = ""
+    #     # pudb.set_trace()
+    #     mgz_featureFile = ""
+    #     mgz_imageFile   = ""
 
-        for root, dirs, files in os.walk(self.str_inputDir):
-            for file in files:
-                if file==self.str_feature:
-                    mgz_featureFile = nib.load("%s/%s" % (root, file))
-                elif file==self.str_image:
-                    mgz_imageFile = nib.load("%s/%s" % (root, file))
+    #     for root, dirs, files in os.walk(self.str_inputDir):
+    #         for file in files:
+    #             if file==self.str_feature:
+    #                 mgz_featureFile = nib.load("%s/%s" % (root, file))
+    #             elif file==self.str_image:
+    #                 mgz_imageFile = nib.load("%s/%s" % (root, file))
 
-        # mgz_featureFile = nib.load("%s/%s" (str_path, self.str_feature))
-        # mgz_imageFile = nib.load("%s/%s" (str_path,self.str_image))
-        return {
-            "featureFile":    mgz_featureFile,
-            "imageFile":      mgz_imageFile,   
-        }
-
-        
+    #     # mgz_featureFile = nib.load("%s/%s" (str_path, self.str_feature))
+    #     # mgz_imageFile = nib.load("%s/%s" (str_path,self.str_image))
+    #     return {
+    #         "featureFile":    mgz_featureFile,
+    #         "imageFile":      mgz_imageFile,   
+    #     }
+       
     def inputReadCallback(self, *args, **kwargs):
         """
 
@@ -258,11 +257,6 @@ class mgz2imagetree(object):
             d_read          = at_data[1]
             l_files         = d_read['l_files']
 
-        if self.str_feature in l_files and self.str_image in l_files:   
-            b_status        = True   
-            print("****")
-            print(at_data)
-        
         d_args = {
             "inputFile":            self.str_feature,
             "inputDir":             str_path,
@@ -277,9 +271,12 @@ class mgz2imagetree(object):
             "wholeVolume":          self.str_wholeVolume    
         }
 
-        print(d_args)
-        imgConverter    = mgz2imgslices.object_factoryCreate(d_args).C_convert
-
+        if self.str_feature in l_files and self.str_image in l_files:   
+            b_status        = True   
+            imgConverter    = mgz2imgslices.object_factoryCreate(d_args).C_convert
+        
+        # print(d_args)
+        
         # And now run it!
         # imgConverter.tic()
         imgConverter.run()        
