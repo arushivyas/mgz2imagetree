@@ -40,7 +40,7 @@ str_desc = Colors.CYAN + """
              Colors.YELLOW + str_version + Colors.CYAN + """ --
 
         'mgz2imagetree' is a customizable and friendly MGZ labels filter. 
-         Input DICOM trees are reconstructed in an output
+         Input trees are reconstructed in an output
         directory, preserving directory structure. Each node tree contains
         label directories containing image slices (in png/jpeg format) on the corresponding output directory for each input subject.
 
@@ -52,21 +52,29 @@ def synopsis(ab_shortOnly = False):
     shortSynopsis =  '''
     NAME
 
-	    pfdicom_tagExtract 
-        - process DICOM file header information down a file system tree.
+	    mgz2imagetree 
+        - process mgz files and create labelled directories in a similar tree structure in the output directory.
 
     SYNOPSIS
 
-            pfdicom_tagExtract                                      \\
-                     -I|--inputDir <inputDir>                       \\
-                    [-i|--inputFile <inputFile>]                    \\
-                     -O|--outputDir <outputDir>                     \\
-                     -o|--output <outputFileStem>                   \\
-                    [--outputLeafDir <outputLeafDirFormat>]
-                    [-t|--outputFileType <outputFileType>           \\
-                    [-v <verbosity>]                                \\
-                    [--version]                                     \\
-                    [-x|--man]                                      \\
+            mgz2imagetree                                                  \\
+                    [-I|--inputDir <inputDir>]                                  \\
+                    [-i|--inputFile <inputFile>]                                \\
+                    [-O|--outputDir <outputDir>]                                \\
+                    [-o|--outputFileStem <outputFileStem>]                      \\
+                    [--outputLeafDir <outputLeafDirFormat>]                     \\
+                    [-t|--outputFileType <outputFileType>]                      \\
+                    [--feature <MGZFileToConvertToLabelledSegments>]            \\        
+                    [--image <MGZFileImageFile>]                                \\
+                    [--label <prefixForLabelDirectories>]                       \\
+                    [-n|--normalize]                                            \\
+                    [-l|--lookuptable <LUTfile>]                                \\
+                    [-s|--skipLabelValueList <ListOfLabelNumbersToSkip>]        \\
+                    [-f|--filterLabelValueList <ListOfVoxelValuesToInclude>]    \\
+                    [-w|--wholeVolume <wholeVolDirName>]                        \\
+                    [-v <verbosity>]                                            \\
+                    [--version]                                                 \\
+                    [-x|--man]                                                  \\
                     [-y|--synopsis]
 
     '''
@@ -89,17 +97,16 @@ def synopsis(ab_shortOnly = False):
 
     ARGS
 
-        -I|--inputDir <inputDir>
-        Input DICOM directory to examine. By default, the first file in this
-        directory is examined for its tag information. There is an implicit
-        assumption that each <inputDir> contains a single DICOM series.
+        [-I|--inputDir <inputDir>]
+        Input directory to examine. By default, the first file in this
+        directory is examined for its tag information.
 
         [-i|--inputFile <inputFile>]
         An optional <inputFile> specified relative to the <inputDir>. If 
         specified, then do not perform a directory walk, but convert only 
         this file.
 
-        -O|--outputDir <outputDir>
+        [-O|--outputDir <outputDir>]
         The output root directory that will contain a tree structure identical
         to the input directory, and each "leaf" node will contain the analysis
         results.
@@ -124,17 +131,54 @@ def synopsis(ab_shortOnly = False):
         the stem and are *not* considered extensions.
 
         [-t|--outputFileType <outputFileType>]
-        A comma specified list of output types. These can be:
+        The output file type. If different to <outputFileStem> extension,
+        will override extension in favour of <outputFileType>.
+        Should be a ``png`` or ``jpg``.
 
-            o <type>    <ext>       <desc>
-            o raw       -raw.txt    the raw internal dcm structure to string
-            o json      .json       a json representation
-            o html      .html       an html representation with optional image
-            o dict      -dict.txt   a python dictionary
-            o col       -col.txt    a two-column text representation (tab sep)
-            o csv       .csv        a csv representation
+        [--feature <MGZFileToConvertToLabelledSegments>]
+        
+        [--image <MGZFileImageFile>]
 
-        Note that if not specified, a default type of 'raw' is assigned.
+        [--label <prefixForLabelDirectories>]
+        Prefixes the string <prefixForLabelDirectories> to each filtered 
+        directory name. This is mostly for possible downstream processing, 
+        allowing a subsequent operation to easily determine which of the output
+        directories correspond to labels.
+
+        [-n|--normalize]
+        If specified, will normalize the output image pixel values to
+        0 and 1, otherwise pixel image values will retain the value in
+        the original input volume.
+
+        [-l|--lookuptable <LUTfile>]
+        If passed, perform a lookup on the filtered voxel label values
+        according to the contents of the <LUTfile>. This <LUTfile> should
+        conform to the FreeSurfer lookup table format (documented elsewhere).
+        Note that the special <LUTfile> string ``__val__`` can be passed which
+        effectively means "no <LUTfile>". In this case, the numerical voxel
+        values are used for output directory names. This special string is
+        really only useful for scripted cases of running this application when
+        modifying the CLI is more complex than simply setting the <LUTfile> to
+        ``__val__``.
+
+        [-s|--skipLabelValueList <ListOfLabelNumbersToSkip>]
+        If specified as a comma separated string of label numbers,
+        will not create directories of those label numbers.
+        
+        [-f|--filterLabelValueList <ListOfVoxelValuesToInclude>]
+        The logical inverse of the [skipLabelValueList] flag. If specified,
+        only filter the comma separated list of passed voxel values from the
+        input volume.
+        The default value of "-1" implies all voxel values should be filtered.
+
+        [-w|--wholeVolume <wholeVolDirName>]
+        If specified, creates a diretory called <wholeVolDirName> (within the
+        outputdir) containing PNG/JPG images files of the entire input.
+        This effectively really creates a PNG/JPG conversion of the input
+        mgz file.
+        Values in the image files will be the same as the original voxel
+        values in the ``mgz``, unless the [--normalize] flag is specified
+        in which case this creates a single-value mask of the input image.
 
         [-x|--man]
         Show full help.
@@ -157,24 +201,9 @@ def synopsis(ab_shortOnly = False):
                     - analyze
                     - write
 
-    EXAMPLES
+    EXAMPLES:
 
-    Extract DICOM header info down an input tree and save reports
-    to output tree:
-
-        pfdicom_tagExtract                                      \\
-                    -I /var/www/html/normsmall -e dcm           \\
-                    -O /var/www/html/tag                        \\
-                    -o '%_md5|6_PatientID-%PatientAge'          \\
-                    -m 'm:%_nospc|-_ProtocolName.jpg'           \\
-                    -s 3:none                                   \\
-                    --useIndexhtml                              \\
-                    -t raw,json,html,dict,col,csv               \\
-                    --threads 0 -v 0 --json
-
-        which will output only at script conclusion and will log a JSON 
-        formatted string.
-
+    #WIP
     '''
     if ab_shortOnly:
         return shortSynopsis

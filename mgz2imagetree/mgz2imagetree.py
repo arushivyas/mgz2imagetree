@@ -274,13 +274,8 @@ class mgz2imagetree(object):
         if self.str_feature in l_files and self.str_image in l_files:   
             b_status        = True   
             imgConverter    = mgz2imgslices.object_factoryCreate(d_args).C_convert
+            imgConverter.run()          
         
-        # print(d_args)
-        
-        # And now run it!
-        # imgConverter.tic()
-        imgConverter.run()        
-
         return {
             'status':           b_status,
             'filesAnalyzed':    filesAnalyzed,
