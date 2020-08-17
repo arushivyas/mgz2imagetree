@@ -12,6 +12,7 @@ from        mgz2imgslices       import mgz2imgslices
 import argparse
 import pftree
 import time
+import pudb
 
 
 class mgz2imagetree(object):
@@ -229,6 +230,7 @@ class mgz2imagetree(object):
             'filesRead':        filesRead
         }
 
+    # pudb.set_trace()
     def inputAnalyzeCallback(self, *args, **kwargs):
         """
         Callback for doing actual work on the read data.
@@ -244,8 +246,6 @@ class mgz2imagetree(object):
         """
     
         b_status            = False
-        filesRead           = 0
-        filesAnalyzed       = 0
 
         # for k, v in kwargs.items():
         #     if k == 'filesRead':    d_MGZRead   = v
@@ -256,6 +256,7 @@ class mgz2imagetree(object):
             str_path        = at_data[0]
             d_read          = at_data[1]
             l_files         = d_read['l_files']
+
 
         d_args = {
             "inputFile":            self.str_feature,
@@ -272,13 +273,15 @@ class mgz2imagetree(object):
         }
 
         if self.str_feature in l_files and self.str_image in l_files:   
-            b_status        = True   
+            b_status        = True  
+            print(d_args) 
+            print("******")
+            print(at_data)
             imgConverter    = mgz2imgslices.object_factoryCreate(d_args).C_convert
             imgConverter.run()          
         
         return {
-            'status':           b_status,
-            'filesAnalyzed':    filesAnalyzed,
+            'status':           b_status
         }
 
     def outputSaveCallback(self, at_data, **kwargs):
