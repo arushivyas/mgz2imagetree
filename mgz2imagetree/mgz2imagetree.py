@@ -242,7 +242,7 @@ class mgz2imagetree(object):
                 b_status        = True  
             
                 mgz2imgslices_args['inputDir']              = str_path
-                print(str(file).upper())
+                
                 if file == self.str_feature:
                     mgz2imgslices_args['inputFile']             = d_inputReadCallback['l_files'][1]
                     mgz2imgslices_args['outputDir']     = str_path.replace(
@@ -263,8 +263,6 @@ class mgz2imagetree(object):
                     
 
                     mgz2imgslices_ns    = Namespace(**mgz2imgslices_args)
-
-                    print(mgz2imgslices_args['outputDir'])
                 
                     imgConverter    = mgz2imgslices.object_factoryCreate(mgz2imgslices_ns).C_convert
                     imgConverter.run()  
@@ -279,7 +277,7 @@ class mgz2imagetree(object):
 
                     if not os.path.exists(mgz2imgslices_args['outputDir']):
                         os.makedirs(mgz2imgslices_args['outputDir']) 
-                    # print(str_path + "***"+ mgz2imgslices_args['inputFile'])
+                    
                     mgz_vol = nib.load("%s/%s" % (str_path, mgz2imgslices_args['inputFile']))
 
                     np_mgz_vol = mgz_vol.get_fdata()
@@ -297,7 +295,7 @@ class mgz2imagetree(object):
                         str_image_name = "%s/%s-%s.%s" % (mgz2imgslices_args['outputDir'],
                             self.str_outputFileStem, current_slice, self.str_outputFileType)
                         self.dp.qprint("Saving %s" % str_image_name, level = 2)
-                        imageio.imwrite(str_image_name, np_data)
+                        imageio.imwrite(str_image_name, np_data) 
                                  
         else:
             b_status        = False      
