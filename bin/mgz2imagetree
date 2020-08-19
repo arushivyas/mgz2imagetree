@@ -270,6 +270,11 @@ parser.add_argument('-w', '--wholeVolume',
                     dest='wholeVolume',
                     default = 'wholeVolume'
                     )
+parser.add_argument('-r', '--rawDirName',
+                    help='name of directory that will contain raw mgz image slices',
+                    dest='rawDirName',
+                    default = 'rawDirName'
+                    )
 parser.add_argument("-x", "--man",
                     help    = "man",
                     dest    = 'man',
@@ -330,6 +335,7 @@ mgz2imagetree = mgz2imagetree.mgz2imagetree(
                         skipLabelValueList  = args.skipLabelValueList,
                         filterLabelValueList= args.filterLabelValueList,
                         wholeVolume         = args.wholeVolume,
+                        rawDirName          = args.rawDirName,
                         man                 = args.man,
                         synopsis            = args.synopsis,
                         verbosity           = args.verbosity,
