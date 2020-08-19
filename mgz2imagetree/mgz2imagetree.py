@@ -10,6 +10,7 @@ from        pfmisc              import  other
 from        pfmisc              import  error
 from        mgz2imgslices       import mgz2imgslices
 import argparse
+from        argparse            import Namespace
 import pftree
 import time
 import pudb
@@ -163,32 +164,7 @@ class mgz2imagetree(object):
             'status':   b_status,
             'l_file':   l_file
         }
-
-    # def MGZFileRead(self, *args, **kwargs):
-    #     """
-
-    #     Extracts all the MGZ files from the inputdir and 
-    #     returns them as dictionary
-    #     """
-
-    #     # pudb.set_trace()
-    #     mgz_featureFile = ""
-    #     mgz_imageFile   = ""
-
-    #     for root, dirs, files in os.walk(self.str_inputDir):
-    #         for file in files:
-    #             if file==self.str_feature:
-    #                 mgz_featureFile = nib.load("%s/%s" % (root, file))
-    #             elif file==self.str_image:
-    #                 mgz_imageFile = nib.load("%s/%s" % (root, file))
-
-    #     # mgz_featureFile = nib.load("%s/%s" (str_path, self.str_feature))
-    #     # mgz_imageFile = nib.load("%s/%s" (str_path,self.str_image))
-    #     return {
-    #         "featureFile":    mgz_featureFile,
-    #         "imageFile":      mgz_imageFile,   
-    #     }
-       
+   
     def inputReadCallback(self, *args, **kwargs):
         """
 
@@ -244,44 +220,66 @@ class mgz2imagetree(object):
         method.**
 
         """
-    
+        
         b_status            = False
 
-        # for k, v in kwargs.items():
-        #     if k == 'filesRead':    d_MGZRead   = v
-        #     if k == 'path':         str_path    = v
+        for k, v in kwargs.items():
+            if k == 'path':         str_path    = v
 
         if len(args):
-            at_data         = args[0]
-            str_path        = at_data[0]
-            d_read          = at_data[1]
-            l_files         = d_read['l_files']
+            at_data                      = args[0]
+            str_path                     = at_data[0]
+            d_inputReadCallback          = at_data[1]
+            l_files                      = d_inputReadCallback['l_files']
 
 
-        d_args = {
-            "inputFile":            self.str_feature,
-            "inputDir":             str_path,
-            "outputDir":            self.str_outputDir,
-            "outputFileStem":       self.str_outputFileStem, 
-            "outputFileType":       self.str_outputFileType,
-            "label":                self.str_label,
-            "normalize":            self.b_normalize,
-            "lookuptable":          self.str_lookuptable,
-            "skipLabelValueList":   self.str_skipLabelValueList,
-            "filterLabelValueList": self.str_filterLabelValueList,
-            "wholeVolume":          self.str_wholeVolume    
-        }
-
+        # d_args = {
+        #     "inputFile":            self.str_feature,
+        #     "inputDir":             str_path,
+        #     "outputDir":            self.str_outputDir,
+        #     "outputFileStem":       self.str_outputFileStem, 
+        #     "outputFileType":       self.str_outputFileType,
+        #     "label":                self.str_label,
+        #     "normalize":            self.b_normalize,
+        #     "lookuptable":          self.str_lookuptable,
+        #     "skipLabelValueList":   self.str_skipLabelValueList,
+        #     "filterLabelValueList": self.str_filterLabelValueList,
+        #     "wholeVolume":          self.str_wholeVolume    
+        # }
+        mgz2imgslices_args                  = {}
         if self.str_feature in l_files and self.str_image in l_files:   
+            
             b_status        = True  
-            print(d_args) 
             print("******")
-            print(at_data)
-            imgConverter    = mgz2imgslices.object_factoryCreate(d_args).C_convert
-            imgConverter.run()          
+            print(l_files) 
+        
+            mgz2imgslices_args['inputDir']              = str_path
+            mgz2imgslices_args['inputFile']             = d_inputReadCallback['l_files'][1]
+            mgz2imgslices_args['outputDir']     = str_path.replace(
+                                                self.str_inputDir, 
+                                                self.str_outputDir
+                                            )
+            os.makedirs(mgz2imgslices_args['outputDir'])
+           
+            mgz2imgslices_args['outputFileStem']        = self.str_outputFileStem
+            mgz2imgslices_args['outputFileType']        = self.str_outputFileType
+            mgz2imgslices_args['label']                 = self.str_label
+            mgz2imgslices_args['normalize']             = self.b_normalize
+            mgz2imgslices_args['lookuptable']           = self.str_lookuptable
+            mgz2imgslices_args['skipLabelValueList']    = self.str_skipLabelValueList
+            mgz2imgslices_args['filterLabelValueList']  = self.str_filterLabelValueList                 
+            mgz2imgslices_args['wholeVolume']           = self.str_wholeVolume
+            
+            mgz2imgslices_ns    = Namespace(**mgz2imgslices_args)
+         
+            imgConverter    = mgz2imgslices.object_factoryCreate(mgz2imgslices_ns).C_convert
+            imgConverter.run()  
+               
         
         return {
-            'status':           b_status
+            'status':           b_status,
+            'str_path':         str_path,
+            'l_files':          l_files,
         }
 
     def outputSaveCallback(self, at_data, **kwargs):
@@ -324,6 +322,9 @@ class mgz2imagetree(object):
         The run method is merely a thin shim down to the 
         embedded pftree run method.
         """
+
+        # pudb.set_trace()
+
         b_status            = True
         d_pftreeRun         = {}
         d_inputAnalysis     = {}
@@ -331,7 +332,7 @@ class mgz2imagetree(object):
         b_timerStart        = False
 
         self.dp.qprint(
-                "\tStarting pfdicom run... (please be patient while running)", 
+                "\tStarting mgz run... (please be patient while running)", 
                 level = 1
                 )
 
@@ -378,6 +379,6 @@ class mgz2imagetree(object):
         # if self.b_json:
         #     self.ret_dump(d_ret, **kwargs)
 
-        self.dp.qprint('\tReturning from pfdicom run...', level = 1)
+        self.dp.qprint('\tReturning from mgz run...', level = 1)
 
         return d_ret
