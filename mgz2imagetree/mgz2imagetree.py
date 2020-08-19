@@ -3,6 +3,8 @@ import os, sys
 
 # Project specific imports
 import      nibabel             as nib
+import      imageio
+import      numpy               as np
 import      pfmisc
 from        pfmisc._colors      import  Colors
 from        pfmisc.debug        import  debug
@@ -50,7 +52,7 @@ class mgz2imagetree(object):
         self.str_outputFileStem         = ''
         self.str_outputDir              = ''
         self.str_outputFileType         = ''        
-        self.str_label                  = 'label'
+        self.str_label                  = ''
         self.str_feature                = ''
         self.str_image                  = ''
         self.b_normalize                = False
@@ -58,6 +60,7 @@ class mgz2imagetree(object):
         self.str_skipLabelValueList     = ''
         self.str_filterLabelValueList   = ''
         self.str_wholeVolume            = ''
+        self.str_rawDirName             = ''
         self.maxDepth                   = -1
 
         # pftree dictionary
@@ -83,6 +86,7 @@ class mgz2imagetree(object):
             if key == "skipLabelValueList":     self.str_skipLabelValueList     = value
             if key == "filterLabelValueList":   self.str_filterLabelValueList   = value
             if key == "wholeVolume":            self.str_wholeVolume            = value
+            if key == "rawDirName":             self.str_rawDirName             = value
 
         # Declare pf_tree
         self.pf_tree    = pftree.pftree(
@@ -232,49 +236,71 @@ class mgz2imagetree(object):
             d_inputReadCallback          = at_data[1]
             l_files                      = d_inputReadCallback['l_files']
 
-
-        # d_args = {
-        #     "inputFile":            self.str_feature,
-        #     "inputDir":             str_path,
-        #     "outputDir":            self.str_outputDir,
-        #     "outputFileStem":       self.str_outputFileStem, 
-        #     "outputFileType":       self.str_outputFileType,
-        #     "label":                self.str_label,
-        #     "normalize":            self.b_normalize,
-        #     "lookuptable":          self.str_lookuptable,
-        #     "skipLabelValueList":   self.str_skipLabelValueList,
-        #     "filterLabelValueList": self.str_filterLabelValueList,
-        #     "wholeVolume":          self.str_wholeVolume    
-        # }
         mgz2imgslices_args                  = {}
         if self.str_feature in l_files and self.str_image in l_files:   
+            for file in l_files:
+                b_status        = True  
             
-            b_status        = True  
-            print("******")
-            print(l_files) 
-        
-            mgz2imgslices_args['inputDir']              = str_path
-            mgz2imgslices_args['inputFile']             = d_inputReadCallback['l_files'][1]
-            mgz2imgslices_args['outputDir']     = str_path.replace(
-                                                self.str_inputDir, 
-                                                self.str_outputDir
-                                            )
-            os.makedirs(mgz2imgslices_args['outputDir'])
-           
-            mgz2imgslices_args['outputFileStem']        = self.str_outputFileStem
-            mgz2imgslices_args['outputFileType']        = self.str_outputFileType
-            mgz2imgslices_args['label']                 = self.str_label
-            mgz2imgslices_args['normalize']             = self.b_normalize
-            mgz2imgslices_args['lookuptable']           = self.str_lookuptable
-            mgz2imgslices_args['skipLabelValueList']    = self.str_skipLabelValueList
-            mgz2imgslices_args['filterLabelValueList']  = self.str_filterLabelValueList                 
-            mgz2imgslices_args['wholeVolume']           = self.str_wholeVolume
-            
-            mgz2imgslices_ns    = Namespace(**mgz2imgslices_args)
-         
-            imgConverter    = mgz2imgslices.object_factoryCreate(mgz2imgslices_ns).C_convert
-            imgConverter.run()  
-               
+                mgz2imgslices_args['inputDir']              = str_path
+                print(str(file).upper())
+                if file == self.str_feature:
+                    mgz2imgslices_args['inputFile']             = d_inputReadCallback['l_files'][1]
+                    mgz2imgslices_args['outputDir']     = str_path.replace(
+                                                        self.str_inputDir, 
+                                                        self.str_outputDir
+                                                    )
+                    if not os.path.exists(mgz2imgslices_args['outputDir']):
+                        os.makedirs(mgz2imgslices_args['outputDir'])
+
+                    mgz2imgslices_args['outputFileStem']        = self.str_outputFileStem
+                    mgz2imgslices_args['outputFileType']        = self.str_outputFileType
+                    mgz2imgslices_args['label']                 = self.str_label
+                    mgz2imgslices_args['normalize']             = self.b_normalize
+                    mgz2imgslices_args['lookuptable']           = self.str_lookuptable
+                    mgz2imgslices_args['skipLabelValueList']    = self.str_skipLabelValueList
+                    mgz2imgslices_args['filterLabelValueList']  = self.str_filterLabelValueList                 
+                    mgz2imgslices_args['wholeVolume']           = self.str_wholeVolume
+                    
+
+                    mgz2imgslices_ns    = Namespace(**mgz2imgslices_args)
+
+                    print(mgz2imgslices_args['outputDir'])
+                
+                    imgConverter    = mgz2imgslices.object_factoryCreate(mgz2imgslices_ns).C_convert
+                    imgConverter.run()  
+
+                elif file == self.str_image:
+                    mgz2imgslices_args['inputFile']             = d_inputReadCallback['l_files'][0]
+                    mgz2imgslices_args['outputDir']     = str_path.replace(
+                                                        self.str_inputDir, 
+                                                        self.str_outputDir
+                                                    )+"/"+self.str_rawDirName
+                    print(mgz2imgslices_args['outputDir'])
+
+                    if not os.path.exists(mgz2imgslices_args['outputDir']):
+                        os.makedirs(mgz2imgslices_args['outputDir']) 
+                    # print(str_path + "***"+ mgz2imgslices_args['inputFile'])
+                    mgz_vol = nib.load("%s/%s" % (str_path, mgz2imgslices_args['inputFile']))
+
+                    np_mgz_vol = mgz_vol.get_fdata()
+
+                    i_total_slices = np_mgz_vol.shape[0]
+                    
+                    for current_slice in range(0, i_total_slices):
+                        np_data = np_mgz_vol[:, :, current_slice]
+
+                        # prevents lossy conversion
+                        np_data=np_data.astype(np.uint8)
+
+                        current_slice = "00"+str(current_slice)
+
+                        str_image_name = "%s/%s-%s.%s" % (mgz2imgslices_args['outputDir'],
+                            self.str_outputFileStem, current_slice, self.str_outputFileType)
+                        self.dp.qprint("Saving %s" % str_image_name, level = 2)
+                        imageio.imwrite(str_image_name, np_data)
+                                 
+        else:
+            b_status        = False      
         
         return {
             'status':           b_status,
