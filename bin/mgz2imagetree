@@ -136,8 +136,12 @@ def synopsis(ab_shortOnly = False):
         Should be a ``png`` or ``jpg``.
 
         [--feature <MGZFileToConvertToLabelledSegments>]
+        The feature file containing the cortical strip which needs to be filtered 
+        into its constituent cortical segments using ``mgz2imgslices``
         
         [--image <MGZFileImageFile>]
+        The raw 3D mgz image file that needs to be split and stored
+        as slices in the corresponding subject's output directory.
 
         [--label <prefixForLabelDirectories>]
         Prefixes the string <prefixForLabelDirectories> to each filtered 
@@ -180,6 +184,10 @@ def synopsis(ab_shortOnly = False):
         values in the ``mgz``, unless the [--normalize] flag is specified
         in which case this creates a single-value mask of the input image.
 
+        [-r|--rawDirName]
+        The name that the user wants to use to store the slices of the 
+        raw mgz image file
+        
         [-x|--man]
         Show full help.
 
