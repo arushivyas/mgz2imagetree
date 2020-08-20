@@ -304,28 +304,6 @@ class mgz2imagetree(object):
             'l_files':          l_files,
         }
 
-    def outputSaveCallback(self, at_data, **kwargs):
-        """
-
-        Callback for saving outputs.
-
-        In order to be thread-safe, all directory/file 
-        descriptors must be *absolute* and no chdir()'s
-        must ever be called!
-
-        The input 'data' is the return dictionary from the
-        inputAnalyzeCallback method.
-
-        """
-
-        # print("in output save call back")
-        
-        return {
-            'status':       True,
-            'outputFile':   "",
-            'filesSaved':   0
-        }
-
     def create_imagetree(self, **kwargs):
         """
         A simple "alias" for calling the pftree method.
