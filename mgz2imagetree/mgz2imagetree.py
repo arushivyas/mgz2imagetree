@@ -272,8 +272,7 @@ class mgz2imagetree(object):
                                                         self.str_inputDir, 
                                                         self.str_outputDir
                                                     )+"/"+self.str_rawDirName
-                    print(mgz2imgslices_args['outputDir'])
-
+                    
                     if not os.path.exists(mgz2imgslices_args['outputDir']):
                         os.makedirs(mgz2imgslices_args['outputDir']) 
                     
