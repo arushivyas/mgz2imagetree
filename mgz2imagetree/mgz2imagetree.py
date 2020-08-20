@@ -181,7 +181,6 @@ class mgz2imagetree(object):
         """
 
         b_status            = True
-        str_file            = ''
         filesRead           = 0
 
 
