@@ -113,5 +113,29 @@ EXAMPLE 1
         --wholeVolume FullVolume                                               \
         --rawDirName RawImageDirectory                                         \
         
-         
-        
+- In the ``outputDir`` the directory structure of the ``inputDir`` will be replicated, and each subject directory will contain the labelled directoriescreated using ``mgz2imgslices``.
+
+- For an input directory of a structure like the following:
+
+.. code:: bash
+
+        ${DEVEL}/mgz_converter_dataset/subject1/featureFile.mgz 
+        ${DEVEL}/mgz_converter_dataset/subject2/featureFile.mgz    
+
+        ....
+        ....
+
+        ${DEVEL}/mgz_converter_dataset/subjectN/featureFile.mgz
+
+- The output will look something like this:
+
+.. code:: bash
+
+    
+        results/subject1/label-001/sample-000.jpg ..... results/subject1/label-0012175/sample-000.jpg
+        results/subject2/label-001/sample-000.jpg ..... results/subject2/label-0012175/sample-000.jpg
+
+        ....
+        ....
+
+        results/subjectN/label-001/sample-000.jpg ..... results/subjectN/label-0012175/sample-000.jpg
