@@ -1,4 +1,4 @@
-mgz2imagetree 1.0.1
+mgz2imagetree 1.0.2
 ===================
 
 Quick Overview 
@@ -24,9 +24,13 @@ Dependencies
 Make sure that the following dependencies are installed on your host system (or even better, a ``python3`` virtual env):
 
 ``pfmisc`` : (a general miscellaneous module for color support, etc)
+
 ``nibabel`` : (to read NIfTI/MGZ files)
+
 ``numpy`` : (to support large, multidimensional arrays and matrices)
+
 ``imageio`` : (interface to read and write image data)
+
 ``pftree`` : Create a dictionary representation of a filesystem hierarchy.
 
 Assumptions
