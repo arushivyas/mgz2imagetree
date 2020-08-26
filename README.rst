@@ -1,4 +1,4 @@
-mgz2imagetree 1.0.0
+mgz2imagetree 1.0.1
 ===================
 
 Quick Overview 
@@ -13,6 +13,7 @@ Overview
 ``mgz2imagetree`` is a simple Python utility that recursively walks down an ``inputdir``, extracts all the ``mgz`` files, filters "labels" from ``mgz`` volume files and saves each label set as slices of (by default) ``png`` files (using the Python utility called ``mgz2imgslices``), organized into a series of directories, one per label set for each subject, and replicates the entire direcotry structure in the ``outputdir``.
 
 This utility also allows to pass all the CLI arguments that are specific to ``mgz2imgslices``.
+
 NOTE:
 
 An ``mgz`` format file simply contains a 3D volume data structure of image values. Often these values are interpreted to be image intensities. Sometimes, however, they can be interpreted as label identifiers. Regardless of the interpretation, the volume image data is simply a number value in each voxel of the volume.
