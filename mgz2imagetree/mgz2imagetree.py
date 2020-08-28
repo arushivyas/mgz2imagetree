@@ -36,7 +36,7 @@ class mgz2imagetree(object):
         #
         self.str_desc                   = ''
         self.__name__                   = "mgz2imagetree"
-        self.str_version                = "1.0.2"
+        self.str_version                = "1.1.2"
         self.verbosity                  = 1
         self.dp                         = pfmisc.debug(
                                             verbosity   = self.verbosity,
@@ -382,3 +382,48 @@ class mgz2imagetree(object):
         self.dp.qprint('\tReturning from mgz run...', level = 1)
 
         return d_ret
+
+class object_factoryCreate:
+    """
+    A class that examines input file string for extension information and
+    returns the relevant convert object.
+    """
+
+    def __init__(self, args):
+        """
+        Parse relevant CLI args.
+        """
+        str_outputFileStem, str_outputFileExtension = os.path.splitext(args.outputFileStem)
+        if len(str_outputFileExtension):
+            str_outputFileExtension = str_outputFileExtension.split('.')[1]
+        # try:
+        #     str_inputFileStem, str_inputFileExtension = os.path.splitext(args.inputFile)
+        # except:
+        #     sys.exit(1)
+
+        if not len(args.outputFileType) and len(str_outputFileExtension):
+            args.outputFileType = str_outputFileExtension
+
+        if len(str_outputFileExtension):
+            args.outputFileStem = str_outputFileStem
+
+        self.C_convert = mgz2imagetree(
+            inputFile            = args.inputFile,
+            inputDir             = args.inputDir,
+            outputDir            = args.outputDir,
+            outputFileStem       = args.outputFileStem,
+            outputFileType       = args.outputFileType,
+            feature              = args.feature,
+            image                = args.image,
+            label                = args.label,
+            normalize            = args.normalize,
+            lookuptable          = args.lookuptable,
+            skipLabelValueList   = args.skipLabelValueList,
+            filterLabelValueList = args.filterLabelValueList,
+            wholeVolume          = args.wholeVolume,
+            rawDirName           = args.rawDirName,
+            man                  = args.man,
+            synopsis             = args.synopsis,
+            verbosity            = args.verbosity,
+            version              = str_version   
+        )
