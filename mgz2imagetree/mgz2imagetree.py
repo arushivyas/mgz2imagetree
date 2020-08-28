@@ -425,5 +425,5 @@ class object_factoryCreate:
             man                  = args.man,
             synopsis             = args.synopsis,
             verbosity            = args.verbosity,
-            version              = str_version   
+            version              = args.version    
         )
