@@ -36,7 +36,7 @@ class mgz2imagetree(object):
         #
         self.str_desc                   = ''
         self.__name__                   = "mgz2imagetree"
-        self.str_version                = "1.1.2"
+        self.str_version                = "1.1.4"
         self.verbosity                  = 1
         self.dp                         = pfmisc.debug(
                                             verbosity   = self.verbosity,
