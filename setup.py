@@ -12,7 +12,7 @@ def readme():
 
 setup(
       name             =   'mgz2imagetree',
-      version          =   '1.1.4',
+      version          =   '1.1.6',
       description      =   '(Python) utility to filter mgz volumes to per-voxel-value directories of jpg/png image slices',
       long_description =   readme(),
       author           =   'FNNDSC',
