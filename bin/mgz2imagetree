@@ -19,7 +19,7 @@ import  pfmisc
 from    pfmisc._colors      import Colors
 from    pfmisc              import other
 
-str_version = "1.1.6"
+str_version = "1.1.8"
 str_desc = Colors.CYAN + """
 
                       _____ _                            _                 
@@ -65,9 +65,10 @@ def synopsis(ab_shortOnly = False):
                     [--outputLeafDir <outputLeafDirFormat>]                     \\
                     [-t|--outputFileType <outputFileType>]                      \\
                     [--feature <MGZFileToConvertToLabelledSegments>]            \\        
-                    [--image <MGZFileImageFile>]                                \\
+                    [--imageFile <MGZFileImageFile>]                            \\
                     [--label <prefixForLabelDirectories>]                       \\
                     [-n|--normalize]                                            \\
+                    [--image]                                                   \\
                     [-l|--lookuptable <LUTfile>]                                \\
                     [-s|--skipLabelValueList <ListOfLabelNumbersToSkip>]        \\
                     [-f|--filterLabelValueList <ListOfVoxelValuesToInclude>]    \\
@@ -140,7 +141,7 @@ def synopsis(ab_shortOnly = False):
         The feature file containing the cortical strip which needs to be filtered 
         into its constituent cortical segments using ``mgz2imgslices``
         
-        [--image <MGZFileImageFile>]
+        [--imageFile <MGZFileImageFile>]
         The raw 3D mgz image file that needs to be split and stored
         as slices in the corresponding subject's output directory.
 
@@ -154,6 +155,10 @@ def synopsis(ab_shortOnly = False):
         If specified, will normalize the output image pixel values to
         0 and 1, otherwise pixel image values will retain the value in
         the original input volume.
+
+        [--image]
+        If specified as True(boolean), will save the slices of the mgz file as 
+        ".png" files along with the numpy files.
 
         [-l|--lookuptable <LUTfile>]
         If passed, perform a lookup on the filtered voxel label values
@@ -216,7 +221,7 @@ def synopsis(ab_shortOnly = False):
         --inputDir <inputDir>                                                  \\            
         --outputDir <outputDir>                                                \\
         --feature <featureFile>                                                \\
-        --image <imageFile>                                                    \\
+        --imageFile <imageFile>                                                    \\
         --outputFileStem <outputFileStem>                                      \\
         --outputFileType <outputFileType>                                      \\
         --label <label>                                                        \\

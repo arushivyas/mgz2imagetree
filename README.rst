@@ -1,4 +1,4 @@
-mgz2imagetree 1.0.0
+mgz2imagetree 1.1.8
 ===================
 
 Quick Overview 
@@ -58,7 +58,7 @@ How to Use
 
 - ``[--feature <MGZFileToConvertToLabelledSegments>]`` : The feature file containing the cortical strip which needs to be filtered into it constituent cortical segments using ``mgz2imgslices``
 
-- ``[--image <MGZFileImageFile>]`` : The raw 3D mgz image file that needs to be split and stored as slices in the corresponding subject's output directory.
+- ``[--imageFile <MGZFileImageFile>]`` : The raw 3D mgz image file that needs to be split and stored as slices in the corresponding subject's output directory.
 
 Examples
 --------
@@ -106,7 +106,7 @@ EXAMPLE 1
         --inputDir ${DEVEL}/mgz_converter_dataset/                             \            
         --outputDir ${DEVEL}/results/                                          \ 
         --feature aparc.a2009s+aseg.mgz                                        \
-        --image brain.mgz                                                      \
+        --imageFile brain.mgz                                                      \
         --outputFileStem sample                                                \
         --outputFileType jpg                                                   \
         --label label                                                          \
