@@ -254,9 +254,9 @@ parser.add_argument("--feature",
                     help    = "name of mgz file with features (aparc+aseg)",
                     dest    = 'feature',
                     default = 'aparc+aseg.mgz')
-parser.add_argument("--image",
+parser.add_argument("--imageFile",
                     help    = "name of entire image file (brain.mgz)",
-                    dest    = 'image',
+                    dest    = 'imageFile',
                     default = 'brain.mgz')
 parser.add_argument('--label',
                     help='prefix a label to all the label directories',
@@ -266,6 +266,13 @@ parser.add_argument('--label',
 parser.add_argument('-n', '--normalize',
                     help='normalize the pixels of output image files',
                     dest='normalize',
+                    action='store_true',
+                    default = False
+                    )
+parser.add_argument('--image',
+                    help='store png images for each slice of mgz file',
+                    dest='image',
+                    action='store_true',
                     default = False
                     )
 parser.add_argument('-l', '--lookuptable',
@@ -346,9 +353,10 @@ mgz2imagetree = mgz2imagetree.mgz2imagetree(
                         outputLeafDir       = args.outputLeafDir,
                         outputFileType      = args.outputFileType,
                         feature             = args.feature,
-                        image               = args.image,
+                        imageFile           = args.imageFile,
                         label               = args.label,
                         normalize           = args.normalize,
+                        image               = args.image,
                         lookuptable         = args.lookuptable,
                         skipLabelValueList  = args.skipLabelValueList,
                         filterLabelValueList= args.filterLabelValueList,
@@ -357,6 +365,7 @@ mgz2imagetree = mgz2imagetree.mgz2imagetree(
                         man                 = args.man,
                         synopsis            = args.synopsis,
                         verbosity           = args.verbosity,
+                        printElapsedTime    = args.printElapsedTime,
                         version             = str_version   
                         )
 

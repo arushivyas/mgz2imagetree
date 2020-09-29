@@ -1,4 +1,4 @@
-mgz2imagetree 1.1.6
+mgz2imagetree 1.0.0
 ===================
 
 Quick Overview 
@@ -13,7 +13,6 @@ Overview
 ``mgz2imagetree`` is a simple Python utility that recursively walks down an ``inputdir``, extracts all the ``mgz`` files, filters "labels" from ``mgz`` volume files and saves each label set as slices of (by default) ``png`` files (using the Python utility called ``mgz2imgslices``), organized into a series of directories, one per label set for each subject, and replicates the entire direcotry structure in the ``outputdir``.
 
 This utility also allows to pass all the CLI arguments that are specific to ``mgz2imgslices``.
-
 NOTE:
 
 An ``mgz`` format file simply contains a 3D volume data structure of image values. Often these values are interpreted to be image intensities. Sometimes, however, they can be interpreted as label identifiers. Regardless of the interpretation, the volume image data is simply a number value in each voxel of the volume.
@@ -24,13 +23,9 @@ Dependencies
 Make sure that the following dependencies are installed on your host system (or even better, a ``python3`` virtual env):
 
 ``pfmisc`` : (a general miscellaneous module for color support, etc)
-
 ``nibabel`` : (to read NIfTI/MGZ files)
-
 ``numpy`` : (to support large, multidimensional arrays and matrices)
-
 ``imageio`` : (interface to read and write image data)
-
 ``pftree`` : Create a dictionary representation of a filesystem hierarchy.
 
 Assumptions
@@ -117,30 +112,6 @@ EXAMPLE 1
         --label label                                                          \
         --wholeVolume FullVolume                                               \
         --rawDirName RawImageDirectory                                         \
-        
-- In the ``outputDir`` the directory structure of the ``inputDir`` will be replicated, and each subject directory will contain the labelled directoriescreated using ``mgz2imgslices``.
 
-- For an input directory of a structure like the following:
 
-.. code:: bash
-
-        ${DEVEL}/mgz_converter_dataset/subject1/featureFile.mgz 
-        ${DEVEL}/mgz_converter_dataset/subject2/featureFile.mgz    
-
-        ....
-        ....
-
-        ${DEVEL}/mgz_converter_dataset/subjectN/featureFile.mgz
-
-- The output will look something like this:
-
-.. code:: bash
-
-    
-        results/subject1/label-001/sample-000.jpg ..... results/subject1/label-0012175/sample-000.jpg
-        results/subject2/label-001/sample-000.jpg ..... results/subject2/label-0012175/sample-000.jpg
-
-        ....
-        ....
-
-        results/subjectN/label-001/sample-000.jpg ..... results/subjectN/label-0012175/sample-000.jpg
+-         

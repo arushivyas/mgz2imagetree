@@ -54,14 +54,18 @@ class mgz2imagetree(object):
         self.str_outputFileType         = ''        
         self.str_label                  = ''
         self.str_feature                = ''
-        self.str_image                  = ''
+        self.str_imageFile                  = ''
         self.b_normalize                = False
+        self.b_image                    = False
         self.str_lookuptable            = '__val__'
         self.str_skipLabelValueList     = ''
         self.str_filterLabelValueList   = ''
         self.str_wholeVolume            = ''
         self.str_rawDirName             = ''
         self.maxDepth                   = -1
+        self.b_printElapsedTime         = False
+        self.b_man                      = False
+        self.b_synopsis                 = False
 
         # pftree dictionary
         self.pf_tree                    = None
@@ -80,13 +84,18 @@ class mgz2imagetree(object):
             if key == "outputFileType":         self.str_outputFileType         = value
             if key == "label":                  self.str_label                  = value
             if key == "feature":                self.str_feature                = value
-            if key == "image":                  self.str_image                  = value
+            if key == "imageFile":              self.str_imageFile              = value
             if key == "normalize":              self.b_normalize                = value
             if key == "lookuptable":            self.str_lookuptable            = value
             if key == "skipLabelValueList":     self.str_skipLabelValueList     = value
             if key == "filterLabelValueList":   self.str_filterLabelValueList   = value
             if key == "wholeVolume":            self.str_wholeVolume            = value
             if key == "rawDirName":             self.str_rawDirName             = value
+            if key == "image":                  self.b_image                    = value
+            if key == "printElapsedTime":       self.b_printElapsedTime         = value
+            if key == 'man':                    self.b_man                      = value
+            if key == 'synopsis':               self.b_synopsis                 = value
+            if key == 'verbosity':              self.verbosity                  = value
 
         # Declare pf_tree
         self.pf_tree    = pftree.pftree(
@@ -195,7 +204,7 @@ class mgz2imagetree(object):
             str_path        = at_data[0]
             l_files          = at_data[1]
 
-        if self.str_feature in l_files and self.str_image in l_files:
+        if self.str_feature in l_files and self.str_imageFile in l_files:
             self.dp.qprint("reading: %s" % (str_path), level = 1)
             b_status = True
             filesRead += 2
@@ -236,7 +245,7 @@ class mgz2imagetree(object):
             l_files                      = d_inputReadCallback['l_files']
 
         mgz2imgslices_args                  = {}
-        if self.str_feature in l_files and self.str_image in l_files:   
+        if self.str_feature in l_files and self.str_imageFile in l_files:   
             for file in l_files:
                 b_status        = True  
             
@@ -259,6 +268,11 @@ class mgz2imagetree(object):
                     mgz2imgslices_args['skipLabelValueList']    = self.str_skipLabelValueList
                     mgz2imgslices_args['filterLabelValueList']  = self.str_filterLabelValueList                 
                     mgz2imgslices_args['wholeVolume']           = self.str_wholeVolume
+                    mgz2imgslices_args['image']                 = self.b_image
+                    mgz2imgslices_args['printElapsedTime']      = self.b_printElapsedTime
+                    mgz2imgslices_args['man']                   = self.b_man
+                    mgz2imgslices_args['synopsis']              = self.b_synopsis
+                    mgz2imgslices_args['verbosity']             = self.verbosity
                     
 
                     mgz2imgslices_ns    = Namespace(**mgz2imgslices_args)
@@ -266,7 +280,7 @@ class mgz2imagetree(object):
                     imgConverter    = mgz2imgslices.object_factoryCreate(mgz2imgslices_ns).C_convert
                     imgConverter.run()  
 
-                elif file == self.str_image:
+                elif file == self.str_imageFile:
                     mgz2imgslices_args['inputFile']             = d_inputReadCallback['l_files'][0]
                     mgz2imgslices_args['outputDir']     = str_path.replace(
                                                         self.str_inputDir, 
@@ -414,9 +428,10 @@ class object_factoryCreate:
             outputFileStem       = args.outputFileStem,
             outputFileType       = args.outputFileType,
             feature              = args.feature,
-            image                = args.image,
+            imageFile            = args.imageFile,
             label                = args.label,
             normalize            = args.normalize,
+            image                = args.image,
             lookuptable          = args.lookuptable,
             skipLabelValueList   = args.skipLabelValueList,
             filterLabelValueList = args.filterLabelValueList,
@@ -425,5 +440,6 @@ class object_factoryCreate:
             man                  = args.man,
             synopsis             = args.synopsis,
             verbosity            = args.verbosity,
+            printElapsedTime     = args.printElapsedTime,
             version              = args.version    
         )
